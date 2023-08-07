@@ -22,7 +22,7 @@ const tooltip = select('body').append('div').attr('id', 'tooltip')
 
 const margin = {
     top: 50, 
-    bottom: 50,
+    bottom: 300,
     left: 50, 
     right: 50
 }
@@ -118,6 +118,37 @@ const drawTreemap = async (dataURL,root) => {
                 .attr('x', d => d.x0)
                 .attr('y', (d,i) => 10 + d.y0+i*10)
                 .text(d => d.text)
+
+        const categories = data.children.map(element => element.name)
+ 
+        const legends = root.append('g')
+
+          console.log(categories)
+        legends.selectAll('.legend')
+        .data(categories)
+        .enter()
+        .append('rect')
+            .attr('class', 'legend')
+            .attr('fill',d => colorsByCategory[d])
+            .attr('stroke', 'black')
+            .attr('stroke-width', 1)
+            .attr('x', 0)
+            .attr('y', (_,i) => height+i*10)
+            .attr('width',10)
+            .attr('height',10)
+         
+        const legendText = root.append('g')
+        legendText
+        .selectAll('legend-text')
+            .data(categories)
+            .enter()
+            .append('text')
+            .attr('class', 'legend-text')
+            .text(d => d)
+            .attr('fill', 'black')
+            .attr('font-size', '12px')
+            .attr('x', 10 + 10)
+            .attr('y', (_,i)=> (height + i*10))
 
 
 }
