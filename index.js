@@ -28,7 +28,7 @@ const margin = {
 }
 
 const width = window.innerWidth*0.7 - margin.left - margin.right;
-const height = window.innerHeight*0.7 - margin.top - margin.bottom;
+const height = window.innerHeight*0.9 - margin.top - margin.bottom;
 
 const drawTreemap = async (dataURL,root) => {
     const data = await json(dataURL)
@@ -122,22 +122,45 @@ const drawTreemap = async (dataURL,root) => {
         const categories = data.children.map(element => element.name)
  
         const legends = root.append('g')
+                            // .attr('tranform', `translate(${-10000},${height+100})`)
+                            .attr('fill','red')
 
-          console.log(categories)
+        const NUMBER_OF_LEGENDS = categories.length;
+        const NUMBER_OF_LEGENDS_PER_COLUMN = 5;
+        const NUMBER_OF_LEGEND_COLUMNS = Math.floor(NUMBER_OF_LEGENDS / NUMBER_OF_LEGENDS_PER_COLUMN) + 1;
+
+        const LEGEND_WIDTH = 20; 
+        const LEGEND_HEIGHT = 20;
+        
+        const LEGEND_SPACING_X = 100;
+        const LEGEND_SPACING_Y = 10;
+  
+
+        const legendYPosition = (index, spacing = 40) => {
+          let position = index % NUMBER_OF_LEGENDS_PER_COLUMN
+          return height + position*spacing;
+        } 
+
+        const legendXPosition = (index, spacing = 60) => {
+          const CURRENT_COLUMN = Math.floor(index / NUMBER_OF_LEGENDS_PER_COLUMN)
+          return CURRENT_COLUMN*spacing
+        }
+        
+
+        console.log(categories.length)
+
         legends.selectAll('.legend')
         .data(categories)
-        .enter()
-        .append('rect')
+        .join('rect')
             .attr('class', 'legend')
             .attr('fill',d => colorsByCategory[d])
-            .attr('stroke', 'black')
-            .attr('stroke-width', 1)
-            .attr('x', 0)
-            .attr('y', (_,i) => height+i*10)
-            .attr('width',10)
-            .attr('height',10)
+            .attr('x', (_,i) => legendXPosition(i))
+            .attr('y', (_,j) =>  legendYPosition(j))
+            .attr('width',LEGEND_WIDTH)
+            .attr('height',LEGEND_HEIGHT)
          
-        const legendText = root.append('g')
+
+        const legendText = legends.append('g')
         legendText
         .selectAll('legend-text')
             .data(categories)
@@ -147,8 +170,8 @@ const drawTreemap = async (dataURL,root) => {
             .text(d => d)
             .attr('fill', 'black')
             .attr('font-size', '12px')
-            .attr('x', 10 + 10)
-            .attr('y', (_,i)=> (height + i*10))
+            .attr('x',(_,i) => legendXPosition(i) + 25)
+            .attr('y', (_,j)=> legendYPosition(j) + (LEGEND_HEIGHT / 2) + 5)
 
 
 }
