@@ -12,7 +12,7 @@ const videoGameSales = "https://cdn.freecodecamp.org/testable-projects-fcc/data/
 
 
 // Capture mouse positions
-let globalMousePos = { x: undefined, y: undefined}
+let globalMousePos = { x: undefined, y: undefined }
 window.addEventListener('mousemove', (event) => {
     globalMousePos = { x: event.clientX, y: event.clientY };
   });
@@ -38,12 +38,10 @@ const drawTreemap = async (dataURL,root) => {
 
     treemap()
         .size([width, height])
-        .padding(2)
+        .padding(0.35)
         (treemapRoot)
 
     const leaves = treemapRoot.leaves();
-
-    console.log('Leaves',leaves)
 
     const colorsByCategory = {
         "Wii": "#4B91C3",
@@ -72,10 +70,10 @@ const drawTreemap = async (dataURL,root) => {
         .data(leaves)
         .enter()
         .append("rect")
-          .attr('x', function (d) { return d.x0; })
-          .attr('y', function (d) { return d.y0; })
-          .attr('width', function (d) { return d.x1 - d.x0; })
-          .attr('height', function (d) { return d.y1 - d.y0; })
+          .attr('x',(d) => { return d.x0; })
+          .attr('y',(d) => { return d.y0; })
+          .attr('width',(d) => { return d.x1 - d.x0; })
+          .attr('height',(d) => { return d.y1 - d.y0; })
           .style("fill", d => colorsByCategory[d.data.category])
           .on('mousemove', ()=> {
             tooltip.style('left', globalMousePos.x+'px');
@@ -97,59 +95,60 @@ const drawTreemap = async (dataURL,root) => {
           .on('mouseout', ()=> {
             tooltip.style('opacity',0)
           }) 
-
+   
     root
         .selectAll("text")
         .data(leaves)
         .enter()
         .append("text")
-        .attr("font-size", "12px")
         .attr("fill", "black")
-        .attr('width', 50)
-        .attr("x", function(d){ return d.x0})    // +10 to adjust position (more right)
-        .attr("y", function(d){ return d.y0+10}) 
-        .attr('weight',d => d.x1 - d.x0)
-        .attr('height', d => d.y1 - d.y0)
-        .attr('text-overflow', "")
+        .attr('class', 'text')
+        .attr('width', 0)
+        .attr('height', 0)
+        .attr("x", (d) => { return d.x0})    // +10 to adjust position (more right)
+        .attr("y", (d) => { return d.y0+10}) 
         .selectAll('tspan')
             .data(d => d.data.name.split(" ").map(element => ({...d, text: element})))
             .enter()
             .append('tspan')
+            .append('tspan')  
                 .attr('x', d => d.x0)
                 .attr('y', (d,i) => 10 + d.y0+i*10)
+                .attr('class', 'tspan')
                 .text(d => d.text)
 
         const categories = data.children.map(element => element.name)
  
         const legends = root.append('g')
-                            // .attr('tranform', `translate(${-10000},${height+100})`)
-                            .attr('fill','red')
+                            // .attr('class', 'legend-container')
+                            // .attr('tranform', `translate(${0},${height+100})`)
 
-        const NUMBER_OF_LEGENDS = categories.length;
-        const NUMBER_OF_LEGENDS_PER_COLUMN = 5;
-        const NUMBER_OF_LEGEND_COLUMNS = Math.floor(NUMBER_OF_LEGENDS / NUMBER_OF_LEGENDS_PER_COLUMN) + 1;
+      const NUMBER_OF_LEGENDS = categories.length;
+      const NUMBER_OF_LEGENDS_PER_COLUMN = 5;
+      // const NUMBER_OF_LEGEND_COLUMNS = Math.floor(NUMBER_OF_LEGENDS / NUMBER_OF_LEGENDS_PER_COLUMN) + 1;
 
-        const LEGEND_WIDTH = 20; 
-        const LEGEND_HEIGHT = 20;
-        
-        const LEGEND_SPACING_X = 100;
-        const LEGEND_SPACING_Y = 10;
+      const LEGEND_WIDTH = 20; 
+      const LEGEND_HEIGHT = 20;
+      
+      const LEGEND_SPACING_X = 60;
+      const LEGEND_SPACING_Y = 40;
+
+      const LEGEND_TOP_BASE_POSITION = height + 50;
+      const LEGEND_LEFT_BASE_POSITION = ((width - LEGEND_WIDTH) / 2) - 100
   
 
-        const legendYPosition = (index, spacing = 40) => {
-          let position = index % NUMBER_OF_LEGENDS_PER_COLUMN
-          return height + position*spacing;
-        } 
+      const legendYPosition = (index, spacing = LEGEND_SPACING_Y) => {
+        let indexPosition = index % NUMBER_OF_LEGENDS_PER_COLUMN
+        return LEGEND_TOP_BASE_POSITION + indexPosition*spacing;
+      } 
 
-        const legendXPosition = (index, spacing = 60) => {
-          const CURRENT_COLUMN = Math.floor(index / NUMBER_OF_LEGENDS_PER_COLUMN)
-          return CURRENT_COLUMN*spacing
-        }
+      const legendXPosition = (index, spacing = LEGEND_SPACING_X) => {
+        const CURRENT_COLUMN = Math.floor(index / NUMBER_OF_LEGENDS_PER_COLUMN)
+        return LEGEND_LEFT_BASE_POSITION +  margin.left + CURRENT_COLUMN*spacing
+      }
         
 
-        console.log(categories.length)
-
-        legends.selectAll('.legend')
+      legends.selectAll('.legend')
         .data(categories)
         .join('rect')
             .attr('class', 'legend')
@@ -159,8 +158,7 @@ const drawTreemap = async (dataURL,root) => {
             .attr('width',LEGEND_WIDTH)
             .attr('height',LEGEND_HEIGHT)
          
-
-        const legendText = legends.append('g')
+      const legendText = legends.append('g')
         legendText
         .selectAll('legend-text')
             .data(categories)
@@ -171,15 +169,12 @@ const drawTreemap = async (dataURL,root) => {
             .attr('fill', 'black')
             .attr('font-size', '12px')
             .attr('x',(_,i) => legendXPosition(i) + 25)
-            .attr('y', (_,j)=> legendYPosition(j) + (LEGEND_HEIGHT / 2) + 5)
-
-
+            .attr('y', (_,j) => legendYPosition(j) + (LEGEND_HEIGHT / 2) + 5)
 }
-
-const svg = select('#svg-container')
-                .append('svg')
-                .attr('width', width + margin.left + margin.right)
-                .attr('height', height + margin.top + margin.bottom)
-
+          
+        const svg = select('#svg-container')
+                        .append('svg')
+                        .attr('width', width + margin.left + margin.right)
+                        .attr('height', height + margin.top + margin.bottom)
 
 drawTreemap(videoGameSales, svg)

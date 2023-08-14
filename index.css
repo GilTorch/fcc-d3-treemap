@@ -22,3 +22,18 @@ h1, p{
     font-size: 1rem;
     color: white;
 }
+
+.legend-container{
+    background-color: red ;
+    display: none;
+}
+
+.text {
+    fill: black;
+    font-size: 0.75rem;
+    overflow: hidden;
+}
+
+.tspan{
+    overflow: hidden;
+}
