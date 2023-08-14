@@ -74,6 +74,12 @@ const drawTreemap = async (dataURL,root) => {
           .attr('y',(d) => { return d.y0; })
           .attr('width',(d) => { return d.x1 - d.x0; })
           .attr('height',(d) => { return d.y1 - d.y0; })
+          .attr('class', 'tile')
+          .attr('data-name', d => d.data.name)
+          .attr('data-category', d => d.data.category)
+          .attr('data-value', d => {
+           return d.data.value
+          })
           .style("fill", d => colorsByCategory[d.data.category])
           .on('mousemove', ()=> {
             tooltip.style('left', globalMousePos.x+'px');
@@ -82,6 +88,7 @@ const drawTreemap = async (dataURL,root) => {
           .on('mouseover', (e,d) => {
             const data = d.data; 
             const { name, value, category } = data;
+            tooltip.attr('data-value', value)
             const html= `
                <p>Name: ${name}</p>
                <p>Value: ${value}</p>
@@ -120,10 +127,10 @@ const drawTreemap = async (dataURL,root) => {
         const categories = data.children.map(element => element.name)
  
         const legends = root.append('g')
-                            // .attr('class', 'legend-container')
+                            .attr('id', 'legend')
                             // .attr('tranform', `translate(${0},${height+100})`)
 
-      const NUMBER_OF_LEGENDS = categories.length;
+      // const NUMBER_OF_LEGENDS = categories.length;
       const NUMBER_OF_LEGENDS_PER_COLUMN = 5;
       // const NUMBER_OF_LEGEND_COLUMNS = Math.floor(NUMBER_OF_LEGENDS / NUMBER_OF_LEGENDS_PER_COLUMN) + 1;
 
@@ -151,7 +158,7 @@ const drawTreemap = async (dataURL,root) => {
       legends.selectAll('.legend')
         .data(categories)
         .join('rect')
-            .attr('class', 'legend')
+            .attr('class', 'legend-item')
             .attr('fill',d => colorsByCategory[d])
             .attr('x', (_,i) => legendXPosition(i))
             .attr('y', (_,j) =>  legendYPosition(j))
@@ -162,8 +169,7 @@ const drawTreemap = async (dataURL,root) => {
         legendText
         .selectAll('legend-text')
             .data(categories)
-            .enter()
-            .append('text')
+            .join('text')
             .attr('class', 'legend-text')
             .text(d => d)
             .attr('fill', 'black')
